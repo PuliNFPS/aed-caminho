@@ -1,138 +1,137 @@
-/* =====================================================================
- * main.c
- * Disciplina : Algoritmos e Estrutura de Dados
- * Docente    : Marcio Rene Brandao Soussa
- * Trabalho   : Caminho do Conhecimento - 1a Entrega
- *
- * Compilacao:
- *   gcc main.c jogador.c perguntas.c -o jogo
- *
- * Descricao:
- *   Integra os modulos das duas duplas e demonstra o funcionamento
- *   da Fila FIFO (jogadores) e das Pilhas LIFO embaralhadas (perguntas).
- * ===================================================================== */
-
 #include <stdio.h>
-#include <ctype.h>
-#include "jogador.h"
-#include "fila_jogador.h"
-#include "perguntas.h"
-#include "pilha_pergunta.h"
+#include <stdlib.h>
+#include <string.h>
+#include <time.h> // Necessário para o sorteio aleatório
+#include "FILA.H"
+#include "PILHA.H"
 
-/* Prototipo da funcao de cadastro definida em jogador.c */
-tp_fila cadastrarJogadores();
+// ==========================================
+// MÓDULO 1: GERENCIAMENTO DE JOGADORES (FILA)
+// ==========================================
+void cadastrar_jogadores(tp_fila *fila_turnos) {
+    int qtd_jogadores = 0;
 
-/* =====================================================================
- * main
- * ===================================================================== */
+    printf("\n--- CADASTRO DE JOGADORES ---\n");
+    while (qtd_jogadores < 2 || qtd_jogadores > 4) {
+        printf("Quantos jogadores vao participar? (2 a 4): ");
+        scanf("%d", &qtd_jogadores);
+        if (qtd_jogadores < 2 || qtd_jogadores > 4) {
+            printf("Quantidade invalida! Tente novamente.\n");
+        }
+    }
+
+    while (getchar() != '\n'); // Limpa buffer
+
+    for (int i = 0; i < qtd_jogadores; i++) {
+        Jogador novo_jogador;
+        novo_jogador.id = i + 1;
+        novo_jogador.posicao = 0;
+
+        printf("Nome do jogador %d: ", i + 1);
+        fgets(novo_jogador.nome, 50, stdin);
+        novo_jogador.nome[strcspn(novo_jogador.nome, "\n")] = 0;
+
+        if (insereFila(fila_turnos, novo_jogador)) {
+            printf("-> %s posicionado no inicio!\n", novo_jogador.nome);
+        }
+    }
+}
+
+// ==========================================
+// MÓDULO 2: GERENCIAMENTO DE PERGUNTAS (PILHA)
+// ==========================================
+
+// Função auxiliar para embaralhar um vetor de perguntas (Algoritmo Fisher-Yates)
+void embaralhar_vetor(Pergunta arr[], int n) {
+    for (int i = n - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        Pergunta temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+}
+
+// Função para criar, embaralhar e empilhar as perguntas
+void preparar_perguntas(tp_pilha *u1, tp_pilha *u2, tp_pilha *u3) {
+    // Criando um banco de 18 perguntas (6 por unidade, mesclando dificuldades)
+    Pergunta banco[18] = {
+        // Unidade 1
+        {1, "O que e uma variavel?", 1, 1},
+        {2, "Como se declara um inteiro em C?", 1, 1},
+        {3, "O que faz o comando 'for'?", 1, 2},
+        {4, "Diferenca entre 'while' e 'do-while'?", 1, 2},
+        {5, "Como funciona a passagem por referencia?", 1, 3},
+        {6, "Explique a recursividade de cauda.", 1, 3},
+        // Unidade 2
+        {7, "O que e um vetor (array)?", 2, 1},
+        {8, "Como acessar o primeiro elemento de um vetor?", 2, 1},
+        {9, "O que e uma matriz?", 2, 2},
+        {10, "Como se declara uma struct?", 2, 2},
+        {11, "Qual a complexidade de busca em um vetor nao ordenado?", 2, 3},
+        {12, "Como funciona o algoritmo Bubble Sort?", 2, 3},
+        // Unidade 3 (Estruturas de Dados)
+        {13, "O que e o critério LIFO?", 3, 1},
+        {14, "O que e o critério FIFO?", 3, 1},
+        {15, "Quais os ponteiros principais de uma Fila?", 3, 2},
+        {16, "O que acontece em um Stack Overflow?", 3, 2},
+        {17, "Diferenca entre alocacao estatica e dinamica?", 3, 3},
+        {18, "Como implementar uma Pilha usando duas Filas?", 3, 3}
+    };
+
+    // Separando em vetores temporários por unidade para embaralhar
+    Pergunta vet_u1[6], vet_u2[6], vet_u3[6];
+    int c1 = 0, c2 = 0, c3 = 0;
+
+    for (int i = 0; i < 18; i++) {
+        if (banco[i].unidade == 1) vet_u1[c1++] = banco[i];
+        else if (banco[i].unidade == 2) vet_u2[c2++] = banco[i];
+        else if (banco[i].unidade == 3) vet_u3[c3++] = banco[i];
+    }
+
+    // Sorteando a ordem (inclusão de forma aleatória)
+    embaralhar_vetor(vet_u1, 6);
+    embaralhar_vetor(vet_u2, 6);
+    embaralhar_vetor(vet_u3, 6);
+
+    // Empilhando nas respectivas pilhas da disciplina
+    for (int i = 0; i < 6; i++) {
+        push(u1, vet_u1[i]);
+        push(u2, vet_u2[i]);
+        push(u3, vet_u3[i]);
+    }
+    printf("\n-> 18 Perguntas criadas, embaralhadas e empilhadas com sucesso!\n");
+}
+
+// ==========================================
+// FUNÇÃO PRINCIPAL
+// ==========================================
 int main() {
+    // Semente para geração de números aleatórios
+    srand(time(NULL));
 
-    printf("\n");
-    printf("  ============================================\n");
-    printf("    CAMINHO DO CONHECIMENTO - 1a Entrega\n");
-    printf("    Algoritmos e Estrutura de Dados\n");
-    printf("  ============================================\n");
+    // Declarando as estruturas
+    tp_fila fila_turnos;
+    tp_pilha pilha_u1, pilha_u2, pilha_u3;
 
-    /* ------------------------------------------------------------------
-     * ETAPA 1: Carregar banco de perguntas (Dupla 2 - perguntas.c)
-     * ------------------------------------------------------------------ */
-    printf("\n  [1/3] Carregando banco de perguntas...\n");
-    carregarBancoDePerguntas();
-    printf("  %d perguntas carregadas com sucesso!\n", TOTAL_PERGUNTAS);
+    // 1. Inicialização
+    inicializa_fila(&fila_turnos);
+    inicializa_pilha(&pilha_u1);
+    inicializa_pilha(&pilha_u2);
+    inicializa_pilha(&pilha_u3);
 
-    /* ------------------------------------------------------------------
-     * ETAPA 2: Inicializar pilhas embaralhadas (Dupla 2 - pilha_pergunta.h)
-     * ------------------------------------------------------------------ */
-    printf("\n  [2/3] Inicializando pilhas (Fisher-Yates)...\n\n");
-    inicializarPilhas();
+    printf("============================================\n");
+    printf("     CAMINHO DO CONHECIMENTO - FASE 1       \n");
+    printf("============================================\n");
 
-    /* ------------------------------------------------------------------
-     * ETAPA 3: Cadastrar jogadores na Fila FIFO (Dupla 1 - jogador.c)
-     * ------------------------------------------------------------------ */
-    printf("\n  [3/3] Cadastro de jogadores...\n");
-    tp_fila fila = cadastrarJogadores();
+    // 2. Funcionalidade da Dupla 1 (Jogadores)
+    cadastrar_jogadores(&fila_turnos);
 
-    /* ------------------------------------------------------------------
-     * DEMONSTRACAO 1: Fila de turno dos jogadores
-     * ------------------------------------------------------------------ */
-    printf("\n  ============================================\n");
-    printf("   FILA FIFO - Ordem de turno dos jogadores\n");
-    printf("  ============================================\n");
-    imprimeFila(fila);
-    printf("  Total de jogadores na fila: %d\n", tamanhoFila(&fila));
+    // 3. Funcionalidade da Dupla 2 (Perguntas)
+    preparar_perguntas(&pilha_u1, &pilha_u2, &pilha_u3);
 
-    /* ------------------------------------------------------------------
-     * DEMONSTRACAO 2: Conteudo das pilhas embaralhadas
-     * ------------------------------------------------------------------ */
-    printf("\n  ============================================\n");
-    printf("   PILHAS LIFO - Perguntas por unidade\n");
-    printf("   (embaralhadas pelo algoritmo Fisher-Yates)\n");
-    printf("  ============================================\n");
-    for (int u = 0; u < NUM_UNIDADES; u++) {
-        printf("\n  Pilha da %s (%d perguntas):\n",
-               nomeUnidade(u + 1),
-               altura_pilha(&pilhasPorUnidade[u]));
-        imprime_pilha(pilhasPorUnidade[u]);
-    }
-
-    /* ------------------------------------------------------------------
-     * DEMONSTRACAO 3: Cada jogador responde uma pergunta da Unidade 1
-     * ------------------------------------------------------------------ */
-    printf("\n  ============================================\n");
-    printf("   SIMULACAO - Rodada de perguntas\n");
-    printf("  ============================================\n");
-    printf("  Cada jogador retira uma pergunta do TOPO\n");
-    printf("  da pilha da Unidade 1 e tenta responder.\n\n");
-
-    int total = tamanhoFila(&fila);
-
-    for (int rodada = 1; rodada <= total; rodada++) {
-
-        /* Recarrega pilha se esgotou */
-        if (pilha_vazia(&pilhasPorUnidade[0])) {
-            recarregarPilha(1);
-        }
-
-        /* Retira pergunta do TOPO (LIFO) */
-        Pergunta p;
-        pop(&pilhasPorUnidade[0], &p);
-
-        /* Retira jogador da frente da fila (FIFO) */
-        Jogador j;
-        removeFila(&fila, &j);
-
-        printf("  Rodada %d - Jogador: %s\n", rodada, j.nome);
-        exibirPergunta(&p);
-
-        /* Le resposta */
-        char resp;
-        printf("\n  Sua resposta (A/B/C/D): ");
-        scanf(" %c", &resp);
-        while (getchar() != '\n');
-        resp = toupper(resp);
-
-        /* Avalia */
-        if (resp == p.gabarito) {
-            printf("  CORRETO! A resposta era: %c\n", p.gabarito);
-            j.posicao++;
-        } else {
-            printf("  ERRADO!  A resposta correta era: %c\n", p.gabarito);
-        }
-
-        /* Reinsere jogador no FINAL da fila (FIFO) */
-        insereFila(&fila, j);
-
-        printf("  Perguntas restantes na pilha U1: %d\n", altura_pilha(&pilhasPorUnidade[0]));
-        printf("  ------------------------------------------\n");
-    }
-
-    /* Status final */
-    printf("\n  Estado final da fila:\n");
-    imprimeFila(fila);
-
-    printf("\n  ============================================\n");
-    printf("   Demonstracao concluida!\n");
-    printf("  ============================================\n\n");
+    printf("\n============================================\n");
+    printf("   ESTRUTURAS PRONTAS PARA O JOGO INICIAR!  \n");
+    printf("============================================\n\n");
 
     return 0;
 }
