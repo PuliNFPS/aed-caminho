@@ -20,13 +20,13 @@ typedef struct {
     int ini, fim;
 } tp_fila;
 
-// --- FUNÇÕES DA FILA CORRIGIDAS ---
+// --- FUNCOES DA FILA ---
 
 void inicializa_fila(tp_fila *f) {
-    f->ini = f->fim = MAX - 1; // Corrigido: usando apenas o ponteiro 'f'
+    f->ini = f->fim = MAX - 1;
 }
 
-int filaVazia(tp_fila *f) { // Corrigido: era tp_pilha
+int filaVazia(tp_fila *f) {
     if(f->ini == f->fim) return 1;
     return 0;
 }
@@ -42,7 +42,7 @@ int filaCheia(tp_fila *f) {
     return 0;
 }
 
-int insereFila(tp_fila *f, tp_item e) { // Corrigido: era tp_pilha
+int insereFila(tp_fila *f, tp_item e) {
     if(filaCheia(f))
         return 0;
     f->fim = proximo(f->fim);
