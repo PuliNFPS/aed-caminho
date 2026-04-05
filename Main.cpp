@@ -37,6 +37,9 @@ void cadastrar_jogadores(tp_fila *fila_turnos) {
     }
 }
 
+// ==========================================
+// MODULO 2: GERENCIAMENTO DE PERGUNTAS (PILHA)
+// ==========================================
 
 // cria perguntas
 void perguntas(tp_pilha *facil, tp_pilha *medio, tp_pilha *dificil) {
