@@ -5,10 +5,9 @@
 
 // 1. Estrutura de dados para a Pergunta
 typedef struct {
-    int id;
-    char texto[150];
-    int unidade;     // 1, 2 ou 3
-    int dificuldade; // 1 = Facil, 2 = Medio, 3 = Dificil
+    char texto[120];
+    char resposta;
+    int nivel; //  Facil, Medio, Dificil
 } Pergunta;
 
 // 2. Adaptando o tipo do item da Pilha para receber a Pergunta
@@ -19,7 +18,7 @@ typedef struct {
     tp_item_pilha item[MAX_PILHA];
 } tp_pilha;
 
-// --- FUNCOES DA PILHA CORRIGIDAS ---
+// --- FUNCOES DA PILHA ---
 
 void inicializa_pilha(tp_pilha *p) {
     p->topo = -1;
